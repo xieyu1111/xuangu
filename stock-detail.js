@@ -148,7 +148,7 @@
     const fields1 = 'f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13';
     const fields2 = 'f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61';
     const query = `secid=${encodeURIComponent(secid)}&klt=${klt}&fqt=1&lmt=${lmt}&end=20500101&iscca=1&fields1=${fields1}&fields2=${fields2}`;
-    try { return await jsonp(`${API.kline}?${query}`, 7000); } catch {}
+    try { return await jsonp(`${API.kline}?${query}`, 4000); } catch {}
     try { return await fetchSinaKline(secid, klt, lmt); } catch {}
     try { return await requestJson(`${API.klineBackup}?${query}`); } catch {}
     return await requestJson(`${API.kline}?${query}`);
@@ -593,6 +593,7 @@
   bindEvents();
   if (window.__radarDashboard?.picks) renderQuickStocks(window.__radarDashboard.picks);
 })();
+
 
 
 
