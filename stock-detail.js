@@ -48,17 +48,33 @@
     });
   }
 
-  async function requestJson(url) {
-    try { return await jsonp(url); }
-    catch {
-      const response = await fetch(url, { cache: 'no-store' });
+  async function fetchJson(url, timeout = 9000) {
+    const controller = new AbortController();
+    const timer = window.setTimeout(() => controller.abort(), timeout);
+    try {
+      const response = await fetch(url, { cache: 'no-store', signal: controller.signal });
       if (!response.ok) throw new Error(`接口返回 ${response.status}`);
       const text = await response.text();
       const start = text.indexOf('{');
       const end = text.lastIndexOf('}');
       if (start < 0 || end <= start) throw new Error('接口返回格式异常');
       return JSON.parse(text.slice(start, end + 1));
+    } finally {
+      window.clearTimeout(timer);
     }
+  }
+
+  async function requestJson(url) {
+    try { return await jsonp(url, 8000); } catch {}
+    try { return await fetchJson(url); } catch {}
+    const encoded = encodeURIComponent(url);
+    const proxies = [
+      `https://corsproxy.io/?url=${encoded}`,
+      `https://api.allorigins.win/raw?url=${encoded}`,
+      `https://api.codetabs.com/v1/proxy?quest=${encoded}`
+    ];
+    try { return await Promise.any(proxies.map((proxy) => fetchJson(proxy))); }
+    catch { throw new Error('行情接口暂时不可用，请稍后重试'); }
   }
 
   function inferSecid(code) {
@@ -519,4 +535,5 @@
   bindEvents();
   if (window.__radarDashboard?.picks) renderQuickStocks(window.__radarDashboard.picks);
 })();
+
 
