@@ -48,6 +48,19 @@
     });
   }
 
+  async function requestJson(url) {
+    try { return await jsonp(url); }
+    catch {
+      const response = await fetch(url, { cache: 'no-store' });
+      if (!response.ok) throw new Error(`接口返回 ${response.status}`);
+      const text = await response.text();
+      const start = text.indexOf('{');
+      const end = text.lastIndexOf('}');
+      if (start < 0 || end <= start) throw new Error('接口返回格式异常');
+      return JSON.parse(text.slice(start, end + 1));
+    }
+  }
+
   function inferSecid(code) {
     const clean = String(code || '').replace(/\D/g, '');
     if (!/^\d{6}$/.test(clean)) return '';
@@ -56,7 +69,7 @@
 
   async function fetchQuote(secid) {
     const fields = 'f43,f44,f45,f46,f47,f48,f50,f57,f58,f60,f116,f117,f162,f167,f168,f169,f170,f171';
-    const result = await jsonp(`${API.quote}?secid=${encodeURIComponent(secid)}&fltt=2&invt=2&fields=${fields}`);
+    const result = await requestJson(`${API.quote}?secid=${encodeURIComponent(secid)}&fltt=2&invt=2&fields=${fields}`);
     return result?.data || result || {};
   }
 
@@ -64,14 +77,14 @@
     const fields1 = 'f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13';
     const fields2 = 'f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61';
     const query = `secid=${encodeURIComponent(secid)}&klt=${klt}&fqt=1&lmt=${lmt}&end=20500101&iscca=1&fields1=${fields1}&fields2=${fields2}`;
-    try { return await jsonp(`${API.kline}?${query}`); }
-    catch { return await jsonp(`${API.klineBackup}?${query}`); }
+    try { return await requestJson(`${API.kline}?${query}`); }
+    catch { return await requestJson(`${API.klineBackup}?${query}`); }
   }
 
   async function fetchFlow(secid) {
     const fields1 = 'f1,f2,f3,f7';
     const fields2 = 'f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61,f62,f63';
-    return await jsonp(`${API.flow}?lmt=20&klt=101&secid=${encodeURIComponent(secid)}&fields1=${fields1}&fields2=${fields2}`);
+    return await requestJson(`${API.flow}?lmt=20&klt=101&secid=${encodeURIComponent(secid)}&fields1=${fields1}&fields2=${fields2}`);
   }
 
   function parseBars(payload) {
@@ -397,7 +410,7 @@
 
   async function suggestStocks(query) {
     const url = `${API.suggest}?input=${encodeURIComponent(query)}&type=14&token=D43BF722C8E33BDC906FB84D85E326E8&count=10`;
-    const response = await jsonp(url);
+    const response = await requestJson(url);
     const rows = response?.QuotationCodeTable?.Data || [];
     return rows.filter((row) => row && row.Code && row.Name && (row.Classify === 'AStock' || String(row.SecurityTypeName || '').includes('A') || row.MktNum));
   }
@@ -506,3 +519,4 @@
   bindEvents();
   if (window.__radarDashboard?.picks) renderQuickStocks(window.__radarDashboard.picks);
 })();
+
