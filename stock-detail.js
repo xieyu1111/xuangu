@@ -431,7 +431,7 @@
       const quote = results[0].status === 'fulfilled' ? results[0].value : {};
       const bars = results[1].status === 'fulfilled' ? parseBars(results[1].value) : [];
       const flows = results[2].status === 'fulfilled' ? parseFlows(results[2].value) : [];
-      if (!bars.length) throw new Error('K线接口没有返回有效数据（v20261011e）');
+      if (!bars.length) throw new Error('K线接口没有返回有效数据（v20261011f）');
       const resolvedName = quote?.f58 || name || code;
       const analysis = computeAnalysis(bars, quote, flows, {});
       detail.current = { type: 'stock', secid, code, name: resolvedName, quote, bars, flows, klt: 101, limit: 120, analysis };
@@ -589,10 +589,15 @@
     });
   }
 
+  window.__radarApi = { requestJson, fetchJson, fetchKline, fetchSinaKline, parseBars, parseFlows, computeAnalysis, inferSecid, num, pct, money, cap };
+  window.__radarAnalyzeStock = analyzeStock;
+
   window.renderQuickStocks = renderQuickStocks;
   bindEvents();
   if (window.__radarDashboard?.picks) renderQuickStocks(window.__radarDashboard.picks);
 })();
+
+
 
 
 

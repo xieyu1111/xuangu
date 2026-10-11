@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#08111f">
   <meta name="description" content="按外围市场、新闻情绪、板块强度、历史量价和主力资金筛选A股观察候选。">
   <title>A股量价雷达 | 主线与主力共振</title>
-  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./styles.css?v=20261011e">
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./styles.css?v=20261011f">
 </head>
 <body>
   <div class="noise"></div>
@@ -19,6 +19,7 @@
     </a>
     <nav class="desktop-nav" aria-label="页面导航">
       <a href="#market">市场温度</a>
+      <a href="#intraday">盘中雷达</a>
       <a href="#stock-lab">个股分析</a>
       <a href="#sectors">强势板块</a>
       <a href="#picks">重点观察</a>
@@ -65,9 +66,22 @@
       </div>
     </section>
 
+    <section class="section shell" id="intraday">
+      <div class="section-kicker">
+        <div><span>02</span><h2>盘中实时异动雷达</h2></div>
+        <p>每 60 秒扫描：近几日首次放量异动板块 → 板块内买入候选 → 止损与目标位。</p>
+      </div>
+      <div class="intraday-status-bar">
+        <div id="intradayStatus" class="intraday-status"><span class="live-dot"></span><strong>正在初始化盘中雷达……</strong><small>读取板块与个股行情</small></div>
+        <button type="button" id="intradayRefresh">立即刷新</button>
+      </div>
+      <div class="intraday-grid" id="intradayGrid">
+        <div class="intraday-empty"><h3>正在扫描盘中异动</h3><p>首次扫描需要读取板块和个股 K 线，请稍等。</p></div>
+      </div>
+    </section>
     <section class="section shell" id="stock-lab">
       <div class="section-kicker">
-        <div><span>02</span><h2>个股搜索与 K 线分析</h2></div>
+        <div><span>03</span><h2>个股搜索与 K 线分析</h2></div>
         <p>输入 A 股代码或名称，查看日/周/月 K、均线、量能、RSI、支撑压力和后续情景评分。</p>
       </div>
       <div class="stock-lab-grid">
@@ -79,7 +93,7 @@
           <div class="stock-suggestions" id="stockSuggestions"></div>
           <div class="quick-title">快速分析</div>
           <div class="quick-stocks" id="quickStocks"></div>
-          <p class="search-tip">支持沪市、深市、创业板、科创板；板块卡片也可以点击查看 K 线。K线双数据源 <b>v20261011e</b></p>
+          <p class="search-tip">支持沪市、深市、创业板、科创板；板块卡片也可以点击查看 K 线。K线双数据源 <b>v20261011f</b></p>
         </div>
         <div class="stock-analysis-panel" id="stockAnalysis">
           <div class="analysis-empty">
@@ -92,7 +106,7 @@
     </section>
     <section class="section shell" id="sectors">
       <div class="section-kicker">
-        <div><span>03</span><h2>今日强势板块</h2></div>
+        <div><span>04</span><h2>今日强势板块</h2></div>
         <p>板块强度 = 当日动能 + 主力净流入 + 上涨广度 + 5/20日趋势 + 消息催化</p>
       </div>
       <div class="sector-grid" id="sectorGrid"></div>
@@ -100,7 +114,7 @@
 
     <section class="section shell" id="picks">
       <div class="section-kicker picks-head">
-        <div><span>04</span><h2>主力共振观察</h2></div>
+        <div><span>05</span><h2>主力共振观察</h2></div>
         <p>只列条件最清晰的几只；满足触发条件才进入执行区，不承诺上涨。</p>
       </div>
       <div class="pick-toolbar">
@@ -122,14 +136,14 @@
     <section class="section shell split-section" id="news">
       <div class="news-column">
         <div class="section-kicker compact">
-          <div><span>05</span><h2>消息情绪雷达</h2></div>
+          <div><span>06</span><h2>消息情绪雷达</h2></div>
           <p>按标题与摘要做方向、题材和时效评分</p>
         </div>
         <div class="news-list" id="newsList"></div>
       </div>
       <aside class="strategy-column" id="strategy">
         <div class="section-kicker compact">
-          <div><span>06</span><h2>资深交易纪律</h2></div>
+          <div><span>07</span><h2>资深交易纪律</h2></div>
         </div>
         <div class="strategy-card" id="strategyCard"></div>
       </aside>
@@ -158,6 +172,7 @@
 
   <nav class="mobile-nav" aria-label="移动端导航">
     <a href="#market"><span>温度</span></a>
+    <a href="#intraday"><span>盘中</span></a>
     <a href="#stock-lab"><span>个股</span></a>
     <a href="#sectors"><span>板块</span></a>
     <a href="#picks"><span>观察</span></a>
@@ -166,10 +181,12 @@
   </nav>
 
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  <script src="./app.js?v=20261011e"></script>
-  <script src="./stock-detail.js?v=20261011e"></script>
+  <script src="./app.js?v=20261011f"></script>
+  <script src="./stock-detail.js?v=20261011f"></script>
+  <script src="./intraday-radar.js?v=20261011f"></script>
 </body>
 </html>
+
 
 
 
