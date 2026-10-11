@@ -1,0 +1,149 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#08111f">
+  <meta name="description" content="按外围市场、新闻情绪、板块强度、历史量价和主力资金筛选A股观察候选。">
+  <title>A股量价雷达 | 主线与主力共振</title>
+  <link rel="icon" href="./favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <div class="noise"></div>
+  <header class="topbar">
+    <a class="brand" href="#top" aria-label="返回顶部">
+      <span class="brand-mark" aria-hidden="true">
+        <svg viewBox="0 0 44 44" role="img"><path d="M9 31V17m0 4h7v10H9V21m9-8v20m0-15h7v9h-7v-9m10 4v13m0-18h6v13h-6V18" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 36h32" stroke="currentColor" stroke-width="2" stroke-linecap="round" opacity=".55"/></svg>
+      </span>
+      <span><strong>量潮 Radar</strong><small>A股主线与主力共振</small></span>
+    </a>
+    <nav class="desktop-nav" aria-label="页面导航">
+      <a href="#market">市场温度</a>
+      <a href="#sectors">强势板块</a>
+      <a href="#picks">重点观察</a>
+      <a href="#news">消息雷达</a>
+      <a href="#strategy">交易纪律</a>
+    </nav>
+    <div class="top-actions">
+      <div class="session-chip" id="sessionChip">加载中</div>
+      <button class="icon-button" id="refreshButton" type="button" aria-label="刷新数据" title="刷新数据">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.34 5.66M20 4v7h-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <main id="top">
+    <section class="hero shell" id="market">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="live-dot"></span><span id="marketDate">读取最近交易日</span><span class="sep">/</span><span id="generatedAt">--</span></div>
+        <h1>外围、消息、资金与量价<br>压成<span>条件式观察表</span></h1>
+        <p class="hero-note" id="dataNote">正在连接公开行情与资金流数据……</p>
+        <div class="hero-tags">
+          <span>外围风险偏好</span><span>消息关键词情绪</span><span>板块资金强度</span><span>20日量价结构</span>
+        </div>
+      </div>
+      <div class="risk-panel" id="riskPanel">
+        <div class="risk-ring" id="riskRing">
+          <div><strong id="riskScore">--</strong><small>风险温度</small></div>
+        </div>
+        <div class="risk-copy">
+          <div class="risk-heading"><span id="riskLabel">计算中</span><small id="riskTone">模型读取行情</small></div>
+          <p id="riskSummary">正在综合外围指数、A股涨跌广度和新闻情绪。</p>
+          <div class="position-hint" id="positionHint">仓位建议生成中</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="market-strip-wrap shell" aria-label="全球市场行情">
+      <div class="section-kicker">
+        <div><span>01</span><h2>全球市场温度</h2></div>
+        <p id="breadthSummary">涨跌家数与风险偏好读取中</p>
+      </div>
+      <div class="market-strip" id="marketStrip">
+        <div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div><div class="skeleton-card"></div>
+      </div>
+    </section>
+
+    <section class="section shell" id="sectors">
+      <div class="section-kicker">
+        <div><span>02</span><h2>今日强势板块</h2></div>
+        <p>板块强度 = 当日动能 + 主力净流入 + 上涨广度 + 5/20日趋势 + 消息催化</p>
+      </div>
+      <div class="sector-grid" id="sectorGrid"></div>
+    </section>
+
+    <section class="section shell" id="picks">
+      <div class="section-kicker picks-head">
+        <div><span>03</span><h2>主力共振观察</h2></div>
+        <p>只列条件最清晰的几只；满足触发条件才进入执行区，不承诺上涨。</p>
+      </div>
+      <div class="pick-toolbar">
+        <label class="search-box">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="m16.5 16.5 4 4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <input id="pickSearch" type="search" placeholder="搜索代码 / 名称 / 板块" autocomplete="off">
+        </label>
+        <div class="filter-tabs" id="pickFilters" role="tablist" aria-label="候选分类">
+          <button class="active" data-filter="all" type="button">全部</button>
+          <button data-filter="leader" type="button">龙头强度</button>
+          <button data-filter="accumulation" type="button">低位蓄势</button>
+          <button data-filter="trend" type="button">趋势共振</button>
+        </div>
+      </div>
+      <div class="picks-grid" id="picksGrid"></div>
+      <div class="empty-state" id="picksEmpty" hidden>没有符合条件的候选，请清空搜索词或切换分类。</div>
+    </section>
+
+    <section class="section shell split-section" id="news">
+      <div class="news-column">
+        <div class="section-kicker compact">
+          <div><span>04</span><h2>消息情绪雷达</h2></div>
+          <p>按标题与摘要做方向、题材和时效评分</p>
+        </div>
+        <div class="news-list" id="newsList"></div>
+      </div>
+      <aside class="strategy-column" id="strategy">
+        <div class="section-kicker compact">
+          <div><span>05</span><h2>资深交易纪律</h2></div>
+        </div>
+        <div class="strategy-card" id="strategyCard"></div>
+      </aside>
+    </section>
+
+    <section class="section shell method-section">
+      <div class="method-card">
+        <div>
+          <span class="method-label">模型结构</span>
+          <h2>不是喊单，是一套可复核的筛选过程</h2>
+        </div>
+        <div class="method-grid">
+          <article><i>1</i><h3>先判环境</h3><p>用美股、港股、亚太、欧洲指数与A股涨跌广度决定总仓位上限。</p></article>
+          <article><i>2</i><h3>再选板块</h3><p>当日涨幅、主力净占比、上涨家数、5/20日趋势和消息催化共同打分。</p></article>
+          <article><i>3</i><h3>最后选股</h3><p>在强板块内区分龙头强度、低位蓄势与趋势修复，给出触发和失效位。</p></article>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer shell">
+    <div class="footer-brand"><strong>量潮 Radar</strong><span>公开数据驱动的A股观察工具</span></div>
+    <p id="footerDisclaimer">数据来自公开行情接口，可能存在延迟、缺失或复权差异。仅供研究，不构成投资建议。</p>
+    <div id="warnings" class="warnings"></div>
+  </footer>
+
+  <nav class="mobile-nav" aria-label="移动端导航">
+    <a href="#market"><span>温度</span></a>
+    <a href="#sectors"><span>板块</span></a>
+    <a href="#picks"><span>观察</span></a>
+    <a href="#news"><span>消息</span></a>
+    <a href="#strategy"><span>纪律</span></a>
+  </nav>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  <script src="./app.js"></script>
+</body>
+</html>
+
+
+
+
+
