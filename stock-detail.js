@@ -64,16 +64,26 @@
     }
   }
 
+  function unwrap(data) {
+    if (data?.error) throw new Error(String(data.error));
+    if (data?.contents && typeof data.contents === 'string') {
+      try { return JSON.parse(data.contents); } catch { throw new Error('代理返回格式异常'); }
+    }
+    return data;
+  }
+
   async function requestJson(url) {
     try { return await jsonp(url, 8000); } catch {}
-    try { return await fetchJson(url); } catch {}
+    try { return unwrap(await fetchJson(url)); } catch {}
     const encoded = encodeURIComponent(url);
     const proxies = [
       `https://corsproxy.io/?url=${encoded}`,
       `https://api.allorigins.win/raw?url=${encoded}`,
-      `https://api.codetabs.com/v1/proxy?quest=${encoded}`
+      `https://api.allorigins.win/get?url=${encoded}`,
+      `https://api.codetabs.com/v1/proxy?quest=${encoded}`,
+      `https://whateverorigin.org/get?url=${encoded}`
     ];
-    try { return await Promise.any(proxies.map((proxy) => fetchJson(proxy))); }
+    try { return await Promise.any(proxies.map((proxy) => fetchJson(proxy).then(unwrap))); }
     catch { throw new Error('行情接口暂时不可用，请稍后重试'); }
   }
 
@@ -535,5 +545,6 @@
   bindEvents();
   if (window.__radarDashboard?.picks) renderQuickStocks(window.__radarDashboard.picks);
 })();
+
 
 
