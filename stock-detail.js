@@ -48,6 +48,51 @@
     });
   }
 
+  function loadScriptVariable(url, variableName, timeout = 10000) {
+    return new Promise((resolve, reject) => {
+      const script = document.createElement('script');
+      const timer = window.setTimeout(() => { cleanup(); reject(new Error('备用K线接口超时')); }, timeout);
+      const cleanup = () => { window.clearTimeout(timer); script.remove(); };
+      script.onload = () => {
+        const value = window[variableName];
+        cleanup();
+        if (value) resolve(value);
+        else reject(new Error('备用K线接口没有返回数据'));
+      };
+      script.onerror = () => { cleanup(); reject(new Error('备用K线接口连接失败')); };
+      script.src = url;
+      document.head.appendChild(script);
+    });
+  }
+
+  async function fetchSinaKline(secid, klt, lmt) {
+    const parts = String(secid || '').split('.');
+    const market = parts[0];
+    const code = parts[1] || '';
+    if (!/^\d{6}$/.test(code)) throw new Error('股票代码格式不正确');
+    const prefix = market === '1' ? 'sh' : /^(4|8|92)/.test(code) ? 'bj' : 'sz';
+    const scale = Number(klt) === 102 ? 1200 : Number(klt) === 103 ? 7200 : 240;
+    const variable = `__radar_sina_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+    const url = `https://quotes.sina.cn/cn/api/jsonp_v2.php/${variable}=/CN_MarketDataService.getKLineData?symbol=${prefix}${code}&scale=${scale}&ma=no&datalen=${Math.min(Number(lmt) || 180, 1023)}`;
+    const rows = await loadScriptVariable(url, variable);
+    const bars = (Array.isArray(rows) ? rows : []).map((row) => ({
+      date: row.day,
+      open: num(row.open),
+      close: num(row.close),
+      high: num(row.high),
+      low: num(row.low),
+      volume: num(row.volume),
+      amount: 0,
+      pct: 0,
+      turnover: 0
+    })).filter((bar) => bar.date && bar.close > 0);
+    for (let i = 1; i < bars.length; i++) {
+      bars[i].pct = bars[i - 1].close > 0 ? (bars[i].close / bars[i - 1].close - 1) * 100 : 0;
+    }
+    if (!bars.length) throw new Error('备用K线接口没有返回数据');
+    return { bars };
+  }
+
   async function fetchJson(url, timeout = 9000) {
     const controller = new AbortController();
     const timer = window.setTimeout(() => controller.abort(), timeout);
@@ -103,8 +148,10 @@
     const fields1 = 'f1,f2,f3,f4,f5,f6,f7,f8,f9,f10,f11,f12,f13';
     const fields2 = 'f51,f52,f53,f54,f55,f56,f57,f58,f59,f60,f61';
     const query = `secid=${encodeURIComponent(secid)}&klt=${klt}&fqt=1&lmt=${lmt}&end=20500101&iscca=1&fields1=${fields1}&fields2=${fields2}`;
-    try { return await requestJson(`${API.kline}?${query}`); }
-    catch { return await requestJson(`${API.klineBackup}?${query}`); }
+    try { return await jsonp(`${API.kline}?${query}`, 7000); } catch {}
+    try { return await fetchSinaKline(secid, klt, lmt); } catch {}
+    try { return await requestJson(`${API.klineBackup}?${query}`); } catch {}
+    return await requestJson(`${API.kline}?${query}`);
   }
 
   async function fetchFlow(secid) {
@@ -114,6 +161,7 @@
   }
 
   function parseBars(payload) {
+    if (Array.isArray(payload?.bars)) return payload.bars;
     const rows = payload?.data?.klines;
     if (!Array.isArray(rows)) return [];
     return rows.map((row) => {
@@ -545,6 +593,8 @@
   bindEvents();
   if (window.__radarDashboard?.picks) renderQuickStocks(window.__radarDashboard.picks);
 })();
+
+
 
 
 
