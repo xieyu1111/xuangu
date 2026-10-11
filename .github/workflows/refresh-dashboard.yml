@@ -34,4 +34,6 @@ jobs:
             exit 0
           fi
           git commit -m "chore: refresh dashboard snapshot"
-          git push
+          git push origin HEAD:main
+          git push origin HEAD:gh-pages
+
