@@ -100,6 +100,8 @@ function renderDashboard() {
   renderPicks();
   renderNews(data.news || []);
   renderStrategy(data.strategy);
+  window.__radarDashboard = data;
+  window.renderQuickStocks?.(data.picks || []);
   const warnings = (data.warnings || []).filter(Boolean);
   $('#warnings').innerHTML = warnings.map((w) => `<div>· ${escapeHtml(w)}</div>`).join('');
   if (warnings.length) showToast(warnings[0]);
@@ -140,7 +142,7 @@ function renderSectors(sectors) {
   $('#sectorGrid').innerHTML = sectors.map((sector, index) => {
     const cls = toneClass(sector.changePct);
     const score = Math.max(0, Math.min(100, Number(sector.score || 0)));
-    return `<article class="sector-card" style="animation-delay:${index * 45}ms">
+    return `<article class="sector-card" data-sector-code="${escapeHtml(sector.code)}" data-sector-name="${escapeHtml(sector.name)}" tabindex="0" style="animation-delay:${index * 45}ms">
       <div class="sector-top">
         <div>
           <div class="sector-rank">RANK ${String(sector.rank).padStart(2, '0')}</div>
@@ -160,7 +162,7 @@ function renderSectors(sectors) {
       </div>
       <p class="sector-thesis">${escapeHtml(sector.thesis)}</p>
       <div class="sector-footer">
-        <span class="level-pill">${escapeHtml(sector.level)}</span>
+        <span class="level-pill">${escapeHtml(sector.level)}</span><span class="sector-kline-hint">点击查看 K 线</span>
         <span class="catalyst">${escapeHtml(sector.catalyst)}</span>
       </div>
     </article>`;
@@ -186,7 +188,7 @@ function pickCard(pick, index) {
   const score = Math.max(0, Math.min(100, Number(pick.score || 0)));
   const reasons = (pick.reasons || []).slice(0, 4).map((item) => `<p>${escapeHtml(item)}</p>`).join('');
   const risks = (pick.risks || []).slice(0, 2).map((item) => escapeHtml(item)).join('；');
-  return `<article class="pick-card" data-role="${escapeHtml(pick.roleKey)}" style="animation-delay:${index * 55}ms">
+  return `<article class="pick-card" data-stock-code="${escapeHtml(pick.code)}" data-stock-name="${escapeHtml(pick.name)}" data-role="${escapeHtml(pick.roleKey)}" style="animation-delay:${index * 55}ms">
     <div class="pick-main">
       <div class="pick-head">
         <div class="pick-id">
@@ -219,7 +221,7 @@ function pickCard(pick, index) {
         <div><span>短线支撑</span><b>${escapeHtml(pick.supportText)}</b></div>
         <div><span>结构失效</span><b>${escapeHtml(pick.invalidationText)}</b></div>
       </div>
-      <p class="pick-risks"><span>风险：</span>${risks || '大盘转弱时需降低关注等级'}</p>
+      <p class="pick-risks"><span>风险：</span>${risks || '大盘转弱时需降低关注等级'}</p><span class="pick-kline-hint">点击卡片查看 K 线分析</span>
     </div>
   </article>`;
 }
@@ -295,6 +297,10 @@ $$('#pickFilters button').forEach((button) => {
   });
 });
 
+window.__radarShowToast = showToast;
+
 loadDashboard(false);
+
+
 
 
